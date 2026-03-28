@@ -1,4 +1,9 @@
-from .nodes import LoadImageWithFilename, LoadImageFolder, SaveImageWithFilename, CropImageByMask
+from .nodes import (
+    LoadImageWithFilename,
+    LoadImageFolder,
+    SaveImageWithFilename,
+    CropImageByMask,
+)
 
 NODE_CLASS_MAPPINGS = {
     "LoadImageWithFilename": LoadImageWithFilename,
@@ -13,3 +18,5 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "SaveImageWithFilename": "Save Image With Filename",
     "CropImageByMask": "Crop Image By Mask",
 }
+
+WEB_DIRECTORY = "./js"

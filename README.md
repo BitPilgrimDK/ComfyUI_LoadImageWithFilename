@@ -1,77 +1,64 @@
 # ComfyUI LoadImageWithFilename
 
-This custom node extends ComfyUI's image loading functionality with filename output and folder loading capabilities.
+Custom nodes for loading and saving images while preserving filenames and paths.
 
 ## Features
 
 ### LoadImageWithFilename
-- **Enhanced Load Image Node**: Based on the original ComfyUI LoadImage node
-- **Filename Output**: Returns the filename of the loaded image as a STRING output
-- **Compatible**: Maintains all original functionality (IMAGE and MASK outputs)
+- Load a single image from any folder path
+- Browse button to select image (preserves original path)
+- Outputs: image, mask, filename, save_path, file_extension
+- save_path = the folder where the image is located
 
 ### LoadImageFolder
-- **Folder Loading**: Load all images from a specified folder path
-- **Batch Processing**: Returns all images concatenated as a single tensor
-- **Filename Tracking**: Returns a list of all loaded filenames
-- **Error Handling**: Gracefully handles corrupted or unsupported image files
+- Load images from a folder
+- Takes folder_path as input
+- **Returns ONE image at a time** (alphabetically first)
+- Keeps original height and width intact
+- Use ComfyUI's queue system to process more images
+  - Each queue run loads the next image in the folder
+- Outputs: image, mask, filenames, save_path, file_extensions
 
 ### SaveImageWithFilename
-- **Enhanced Save Image Node**: Based on the original ComfyUI SaveImage node
-- **Custom Filenames**: Accepts single filenames or comma-separated lists of filenames
-- **Flexible Naming**: Can use provided filenames or fall back to default naming
-- **Batch Support**: Handles multiple images with corresponding filenames
+- Save images with custom filenames
+- Accepts filenames input to name each image
+- output_path - folder to save to (leave empty for default)
+- overwrite toggle - True to overwrite, False to rename
+- file_extensions - preserves original format (.jpg, .png, etc.)
 
 ## Installation
 
-1. Place `nodes.py` in your ComfyUI `custom_nodes` directory
+1. Place this folder in ComfyUI `custom_nodes` directory
 2. Restart ComfyUI
-3. The new nodes will appear in the "image" category
+3. Nodes appear in "image" category
 
 ## Usage
 
 ### LoadImageWithFilename
-- **Input**: Select an image file from the dropdown
-- **Outputs**:
-  - `image`: The loaded image tensor
-  - `mask`: The image mask (if available)
-  - `filename`: The filename of the loaded image
+1. Enter folder path or click Browse button
+2. Enter image filename
+3. Connect outputs to other nodes
 
 ### LoadImageFolder
-- **Input**: Enter a folder path as a string
-- **Outputs**:
-  - `image`: All images from the folder concatenated as a single tensor
-  - `mask`: All masks concatenated as a single tensor
-  - `filenames`: List of all loaded filenames
+1. Enter folder path (e.g., `C:\Users\You\Images\textures`)
+2. Run workflow - loads first image alphabetically
+3. Queue more runs to process remaining images
+4. Each run loads the next image
 
 ### SaveImageWithFilename
-- **Inputs**:
-  - `images`: The images to save (IMAGE tensor)
-  - `filenames`: Single filename or comma-separated list of filenames (optional)
-  - `filename_prefix`: Prefix for default naming (optional)
-- **Behavior**:
-  - If filenames are provided, uses them for the corresponding images
-  - If no filenames or fewer filenames than images, uses default naming for remaining images
-  - Automatically adds .png extension to filenames
-  - Saves to ComfyUI output directory
+1. Connect images from processing nodes
+2. Connect filenames from LoadImageWithFilename/LoadImageFolder
+3. Set output_path (or leave empty for default)
+4. Set overwrite = True to save to original location
 
-## Requirements
+## Example Workflow
 
-- ComfyUI
-- PIL (Pillow)
-- PyTorch
-- NumPy
+```
+LoadImageFolder (folder_path: "C:\textures")
+    ↓
+[Your processing nodes - upscale, etc.]
+    ↓
+SaveImageWithFilename (output_path: from LoadImageFolder, overwrite: True)
+```
 
-## Notes
-
-- The LoadImageFolder node will skip any non-image files in the selected folder
-- If no valid images are found in a folder, empty tensors will be returned
-- All images in a folder must have the same dimensions for proper concatenation
-- Error messages are printed to console for any files that fail to load
-- The SaveImageWithFilename node preserves original filenames when possible
-- If filenames contain extensions, they will be replaced with .png
-
-## Based On
-
-- [ComfyUI LoadImage Node](https://github.com/comfyanonymous/ComfyUI/blob/master/nodes.py)
-- [ComfyUI SaveImage Node](https://github.com/comfyanonymous/ComfyUI/blob/master/nodes.py)
-- [Issue #8699](https://github.com/comfyanonymous/ComfyUI/issues/8699) - Request for filename output functionality
+Queue multiple runs to process all images in the folder one by one.
