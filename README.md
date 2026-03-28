@@ -1,4 +1,4 @@
-# ComfyUI LoadImageWithFilename
+# ComfyUI LoadImageWithFilename (BUG right now dont use)
 
 Custom nodes for loading and saving images while preserving filenames and paths.
 
